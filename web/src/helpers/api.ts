@@ -90,6 +90,9 @@ export function getAllMemos(memoFind?: MemoFind) {
 
 export function getMemoList(memoFind?: MemoFind) {
   const queryList = [];
+  if (memoFind?.replayPostId) {
+    queryList.push(`replayPostId=${memoFind.replayPostId}`);
+  }
   if (memoFind?.creatorUsername) {
     queryList.push(`creatorUsername=${memoFind.creatorUsername}`);
   }

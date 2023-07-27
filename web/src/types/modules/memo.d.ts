@@ -25,6 +25,7 @@ interface MemoCreate {
   resourceIdList: ResourceId[];
   relationList: MemoRelationUpsert[];
   visibility?: Visibility;
+  replayPostId?: number;
 }
 
 interface MemoPatch {
@@ -44,4 +45,5 @@ interface MemoFind {
   visibility?: Visibility;
   offset?: number;
   limit?: number;
+  replayPostId?: number;
 }

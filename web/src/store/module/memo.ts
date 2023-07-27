@@ -5,6 +5,7 @@ import { useUserStore } from "./";
 import store, { useAppSelector } from "../";
 import { createMemo, deleteMemo, patchMemo, setIsFetching, upsertMemos } from "../reducer/memo";
 import { useMemoCacheStore } from "../zustand/memo";
+import { setIsFetching2, upsertMemos2 } from "@/store/reducer/memo2";
 
 export const convertResponseModelMemo = (memo: Memo): Memo => {
   return {
@@ -17,6 +18,7 @@ export const convertResponseModelMemo = (memo: Memo): Memo => {
 
 export const useMemoStore = () => {
   const state = useAppSelector((state) => state.memo);
+  const state2 = useAppSelector((state) => state.memo2);
   const userStore = useUserStore();
   const memoCacheStore = useMemoCacheStore();
 
@@ -30,8 +32,12 @@ export const useMemoStore = () => {
 
   return {
     state,
+    state2,
     getState: () => {
       return store.getState().memo;
+    },
+    getState2: () => {
+      return store.getState().memo2;
     },
     fetchMemos: async (limit = DEFAULT_MEMO_LIMIT, offset = 0) => {
       store.dispatch(setIsFetching(true));
@@ -52,6 +58,26 @@ export const useMemoStore = () => {
         memoCacheStore.setMemoCache(m);
       }
 
+      return fetchedMemos;
+    },
+    fetchMemosByPostId: async (limit = DEFAULT_MEMO_LIMIT, offset = 0, replay = 0) => {
+      store.dispatch(setIsFetching2(true));
+      const memoFind: MemoFind = {
+        rowStatus: "NORMAL",
+        limit,
+        offset,
+        replayPostId: replay,
+      };
+      if (userStore.isVisitorMode()) {
+        memoFind.creatorUsername = userStore.getUsernameFromPath();
+      }
+      const { data } = await api.getMemoList(memoFind);
+      const fetchedMemos = data.map((m) => convertResponseModelMemo(m));
+      store.dispatch(upsertMemos2(fetchedMemos));
+      store.dispatch(setIsFetching2(false));
+      for (const m of fetchedMemos) {
+        memoCacheStore.setMemoCache(m);
+      }
       return fetchedMemos;
     },
     fetchAllMemos: async (limit = DEFAULT_MEMO_LIMIT, offset?: number) => {

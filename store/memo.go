@@ -43,8 +43,9 @@ type Memo struct {
 	UpdatedTs int64
 
 	// Domain specific fields
-	Content    string
-	Visibility Visibility
+	Content      string
+	Visibility   Visibility
+	ReplayPostId int
 
 	// Composed fields
 	Pinned         bool
@@ -63,6 +64,7 @@ type FindMemo struct {
 	Pinned         *bool
 	ContentSearch  []string
 	VisibilityList []Visibility
+	ReplayPostId   *int
 
 	// Pagination
 	Limit            *int
@@ -93,9 +95,10 @@ func (s *Store) CreateMemo(ctx context.Context, create *Memo) (*Memo, error) {
 			creator_id,
 			created_ts,
 			content,
-			visibility
+			visibility,
+		    replay_post_id              
 		)
-		VALUES (?, ?, ?, ?)
+		VALUES (?, ?, ?, ?, ?)
 		RETURNING id, created_ts, updated_ts, row_status
 	`
 	if err := s.db.QueryRowContext(
@@ -105,6 +108,7 @@ func (s *Store) CreateMemo(ctx context.Context, create *Memo) (*Memo, error) {
 		create.CreatedTs,
 		create.Content,
 		create.Visibility,
+		create.ReplayPostId,
 	).Scan(
 		&create.ID,
 		&create.CreatedTs,
@@ -121,6 +125,9 @@ func (s *Store) CreateMemo(ctx context.Context, create *Memo) (*Memo, error) {
 func (s *Store) ListMemos(ctx context.Context, find *FindMemo) ([]*Memo, error) {
 	where, args := []string{"1 = 1"}, []any{}
 
+	if v := find.ReplayPostId; v != nil {
+		where, args = append(where, "memo.replay_post_id = ?"), append(args, *v)
+	}
 	if v := find.ID; v != nil {
 		where, args = append(where, "memo.id = ?"), append(args, *v)
 	}

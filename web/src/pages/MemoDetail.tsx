@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslate } from "@/utils/i18n";
 import { Link, useLocation, useParams } from "react-router-dom";
@@ -6,6 +6,8 @@ import { useGlobalStore, useMemoStore } from "@/store/module";
 import useLoading from "@/hooks/useLoading";
 import Icon from "@/components/Icon";
 import Memo from "@/components/Memo";
+import MemoEditorComment from "@/components/MemoEditorComment";
+import MemoListComment from "@/components/MemoListComment";
 
 const MemoDetail = () => {
   const t = useTranslate();
@@ -17,6 +19,12 @@ const MemoDetail = () => {
   const customizedProfile = globalStore.state.systemStatus.customizedProfile;
   const memoId = Number(params.memoId);
   const memo = memoStore.state.memos.find((memo) => memo.id === memoId);
+  const replayPostId = memo?.id;
+  const [commentInputShow, setCommentInputShow] = useState(false);
+
+  const handleShowCommentInput = () => {
+    setCommentInputShow(!commentInputShow);
+  };
 
   useEffect(() => {
     if (memoId && !isNaN(memoId)) {
@@ -45,7 +53,10 @@ const MemoDetail = () => {
           (memo ? (
             <>
               <main className="relative flex-grow max-w-2xl w-full min-h-full flex flex-col justify-start items-start px-4">
-                <Memo memo={memo} showCreator showRelatedMemos />
+                <Memo memo={memo} showCreator showRelatedMemos onShowCommentInput={handleShowCommentInput} />
+
+                <MemoListComment postId={replayPostId} />
+                {commentInputShow && <MemoEditorComment className="mb-2" replayPostId={replayPostId} />}
               </main>
               <div className="mt-4 w-full flex flex-row justify-center items-center gap-2">
                 <Link

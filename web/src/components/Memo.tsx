@@ -25,10 +25,11 @@ interface Props {
   showCreator?: boolean;
   showVisibility?: boolean;
   showRelatedMemos?: boolean;
+  onShowCommentInput?: (show: boolean) => void;
 }
 
 const Memo: React.FC<Props> = (props: Props) => {
-  const { memo, showCreator, showVisibility, showRelatedMemos } = props;
+  const { memo, showCreator, showVisibility, showRelatedMemos, onShowCommentInput } = props;
   const { i18n } = useTranslation();
   const t = useTranslate();
   const filterStore = useFilterStore();
@@ -211,6 +212,12 @@ const Memo: React.FC<Props> = (props: Props) => {
     }
   };
 
+  const handleCommentClick = () => {
+    if (onShowCommentInput) {
+      onShowCommentInput(true);
+    }
+  };
+
   return (
     <>
       <div className={`memo-wrapper ${"memos-" + memo.id} ${memo.pinned && !readonly ? "pinned" : ""}`} ref={memoContainerRef}>
@@ -269,6 +276,10 @@ const Memo: React.FC<Props> = (props: Props) => {
                     <span className="btn text-red-600" onClick={handleDeleteMemoClick}>
                       <Icon.Trash className="w-4 h-auto mr-2" />
                       {t("common.delete")}
+                    </span>
+                    <span className="btn text-red-600" onClick={handleCommentClick}>
+                      <Icon.Trash className="w-4 h-auto mr-2" />
+                      评论
                     </span>
                   </div>
                 </div>

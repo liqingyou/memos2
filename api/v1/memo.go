@@ -65,8 +65,9 @@ type CreateMemoRequest struct {
 	CreatedTs *int64 `json:"createdTs"`
 
 	// Domain specific fields
-	Visibility Visibility `json:"visibility"`
-	Content    string     `json:"content"`
+	Visibility   Visibility `json:"visibility"`
+	Content      string     `json:"content"`
+	ReplayPostId int        `json:"replayPostId"`
 
 	// Related fields
 	ResourceIDList []int                        `json:"resourceIdList"`
@@ -351,6 +352,12 @@ func (s *APIV1Service) registerMemoRoutes(g *echo.Group) {
 	g.GET("/memo", func(c echo.Context) error {
 		ctx := c.Request().Context()
 		findMemoMessage := &store.FindMemo{}
+
+		// 回复的文章id
+		if replayPostId, err := strconv.Atoi(c.QueryParam("replayPostId")); err == nil {
+			findMemoMessage.ReplayPostId = &replayPostId
+		}
+
 		if userID, err := strconv.Atoi(c.QueryParam("creatorId")); err == nil {
 			findMemoMessage.CreatorID = &userID
 		}
@@ -725,10 +732,11 @@ func convertCreateMemoRequestToMemoMessage(memoCreate *CreateMemoRequest) *store
 		createdTs = *memoCreate.CreatedTs
 	}
 	return &store.Memo{
-		CreatorID:  memoCreate.CreatorID,
-		CreatedTs:  createdTs,
-		Content:    memoCreate.Content,
-		Visibility: store.Visibility(memoCreate.Visibility),
+		CreatorID:    memoCreate.CreatorID,
+		CreatedTs:    createdTs,
+		Content:      memoCreate.Content,
+		Visibility:   store.Visibility(memoCreate.Visibility),
+		ReplayPostId: memoCreate.ReplayPostId,
 	}
 }
 
