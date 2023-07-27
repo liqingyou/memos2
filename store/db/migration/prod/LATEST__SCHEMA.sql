@@ -45,12 +45,14 @@ CREATE TABLE memo (
   updated_ts BIGINT NOT NULL DEFAULT (strftime('%s', 'now')),
   row_status TEXT NOT NULL CHECK (row_status IN ('NORMAL', 'ARCHIVED')) DEFAULT 'NORMAL',
   content TEXT NOT NULL DEFAULT '',
-  visibility TEXT NOT NULL CHECK (visibility IN ('PUBLIC', 'PROTECTED', 'PRIVATE')) DEFAULT 'PRIVATE'
+  visibility TEXT NOT NULL CHECK (visibility IN ('PUBLIC', 'PROTECTED', 'PRIVATE')) DEFAULT 'PRIVATE',
+  replay_post_id INTEGER
 );
 
 CREATE INDEX idx_memo_creator_id ON memo (creator_id);
 CREATE INDEX idx_memo_content ON memo (content);
 CREATE INDEX idx_memo_visibility ON memo (visibility);
+CREATE INDEX memo_replay_post_id_index on memo (replay_post_id);
 
 -- memo_organizer
 CREATE TABLE memo_organizer (
